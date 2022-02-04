@@ -4,7 +4,7 @@ const _dirname = path.resolve();
 const fs = require('fs');
 const {v4: uuidv4} = require('uuid');
 
-const notes = require('../db/db.json')
+const notes = require('../db')
 
 const app = express();
 
