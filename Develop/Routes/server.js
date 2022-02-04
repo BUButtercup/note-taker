@@ -90,14 +90,23 @@ app.post('/api/notes', (req, res) => {
 app.delete('/api/notes/:id', (req, res)=>{
     console.log(`${req.method} request recieved to delete note.`);
     fs.readFile('../db/db.json', 'utf-8', (err, data) => {
+        if(err){
+            res.status(500).send(`Request couldn't be completed. Error: ${err}`)
+            throw(err)
+        }
+        if(data===undefined){
+            console.log('no data in file, cannot delete');
+            return res.status(404).send(`No notes in file. Cannot delete.`)
+        }
         try{    
             console.log(data);
             const noteArr = JSON.parse(data);
             console.log(noteArr);
             noteArr.filter(note => {
+                let i;
                 if(note.id === req.params.id){
                     console.log(note)
-                    const i = noteArr.indexOf(note)
+                    i = noteArr.indexOf(note)
                     noteArr.splice(i, 1);
                     console.log(noteArr)
                     fs.writeFile('../db/db.json', JSON.stringify(noteArr), err => {
@@ -107,12 +116,12 @@ app.delete('/api/notes/:id', (req, res)=>{
                         console.log('written');
                     })
                     return res.send(`${note.title} has been deleted!`)
+                } else if(i === undefined){ 
+                    console.log(`Note # ${req.params.id} does not exist in file. Cannot delete.`);
+                    return res.status(404).send(`Note # ${req.params.id} does not exist in file. Cannot delete.`);
                 }
             })
-        } catch (error) {
-            res.status(500).send(`Request couldn't be completed. Error: ${error}`)
-            throw(error)
-        } 
+        } catch(error){console.error};
     })
 })
 
