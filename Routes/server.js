@@ -93,15 +93,11 @@ app.delete('/api/notes/:id', (req, res)=>{
             throw(err)
         }
         try{    
-            console.log(data);
             const noteArr = JSON.parse(data);
-            console.log(noteArr);
             noteArr.filter(note => {
                 if(note.id === req.params.id){
-                    console.log(note)
                     const i = noteArr.indexOf(note)
                     noteArr.splice(i, 1);
-                    console.log(noteArr)
                     fs.writeFile('../db/db.json', JSON.stringify(noteArr), err => {
                         if(err){
                             throw err;
@@ -120,18 +116,14 @@ app.delete('/api/notes/:id', (req, res)=>{
 
 app.put('/api/notes/:id', (req, res) => {
     console.log(`${req.method} request recieved to edit note.`);
-    // const reqBody = JSON.stringify(req.body);
-    // console.log(`ID ${req.params.id}, body: ${reqBody}`)
     fs.readFile('../db/db.json', 'utf-8', (err, data) => {
         if(err){
             res.status(500).send(`Request couldn't be completed. Error: ${err}`)
             throw(err)
         }
         const noteArr = JSON.parse(data);
-        console.log(noteArr);
         noteArr.filter(note => {
             if(note.id === req.params.id){
-                console.log(note)
                 const newNote = {
                     id: note.id,
                     title: req.body.title,
@@ -139,7 +131,6 @@ app.put('/api/notes/:id', (req, res) => {
                 }
                 const i = noteArr.indexOf(note)
                 noteArr.splice(i, 1, newNote);
-                console.log(noteArr);
                 fs.writeFile('../db/db.json', JSON.stringify(noteArr), err => {
                     if(err){
                         throw err;

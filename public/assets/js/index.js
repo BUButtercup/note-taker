@@ -171,15 +171,11 @@ const renderNoteList = async (notes) => {
         'delete-note'
       );
       delBtnEl.addEventListener('click', (e)=>{
-        // .then(data=>{
           handleNoteDelete(e)
           hide(editBtn)
           document.querySelector('.note-title').innerHTML = '';
           document.querySelector('.note-textarea').innerHTML = '';
-
-        // })
       });
-
       liEl.append(delBtnEl);
     }
 
@@ -201,8 +197,6 @@ const renderNoteList = async (notes) => {
     for(let i=1; i<noteListItems.length; i++){
       noteList[0].append(noteListItems[i]);
     }
-    
-    // noteList[0].setAttribute('style', 'display:none');
   }
 };
 
