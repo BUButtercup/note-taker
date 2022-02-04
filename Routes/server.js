@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.use(express.static(path.join(_dirname, '../public')));
+app.use(express.static('public'));
 
 app.get('/', (req, res) => res.sendFile(path.join(_dirname, '../public/index.html')));
 
