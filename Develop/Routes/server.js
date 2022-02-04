@@ -20,8 +20,6 @@ app.get('/', (req, res) => res.sendFile(path.join(_dirname, '../public/index.htm
 
 app.get('/notes', (req, res) => res.sendFile(path.join(_dirname, '../public/notes.html')));
 
-// app.post('/notes', )
-
 app.get('/api/notes', (req, res) => {
     console.log(`${req.method} request made for notes list`);
     fs.readFile('../db/db.json', 'utf-8', (err, data) => {
@@ -67,7 +65,7 @@ app.post('/api/notes', (req, res) => {
     const newNote = {
         id: uuidv4(),
         title: req.body.title,
-        note: req.body.note
+        note: req.body.text
     }
     console.log(newNote)
     console.log(`Did it! newNote: ${newNote.title} / ${res.statusCode}`);
@@ -90,6 +88,10 @@ app.post('/api/notes', (req, res) => {
 app.delete('/api/notes/:id', (req, res)=>{
     console.log(`${req.method} request recieved to delete note.`);
     fs.readFile('../db/db.json', 'utf-8', (err, data) => {
+        if(err){
+            res.status(500).send(`Request couldn't be completed. Error: ${err}`)
+            throw(err)
+        }
         try{    
             console.log(data);
             const noteArr = JSON.parse(data);
@@ -107,19 +109,51 @@ app.delete('/api/notes/:id', (req, res)=>{
                         console.log('written');
                     })
                     return res.send(`${note.title} has been deleted!`)
+                } else if(!noteArr.some(note => note.id === req.params.id)){ 
+                    console.log(`Note # ${req.params.id} does not exist in file. Cannot delete.`);
+                    return res.status(404).send(`Note # ${req.params.id} does not exist in file. Cannot delete.`);
                 }
             })
-        } catch (error) {
-            res.status(500).send(`Request couldn't be completed. Error: ${error}`)
-            throw(error)
-        } 
+        } catch(error){console.error};
     })
 })
 
-// app.put('/api/notes/:id', (req, res) => {
-//     console.log(`${req.method} request recieved to edit note.`);
-//     fs
-// })
+app.put('/api/notes/:id', (req, res) => {
+    console.log(`${req.method} request recieved to edit note.`);
+    // const reqBody = JSON.stringify(req.body);
+    // console.log(`ID ${req.params.id}, body: ${reqBody}`)
+    fs.readFile('../db/db.json', 'utf-8', (err, data) => {
+        if(err){
+            res.status(500).send(`Request couldn't be completed. Error: ${err}`)
+            throw(err)
+        }
+        const noteArr = JSON.parse(data);
+        console.log(noteArr);
+        noteArr.filter(note => {
+            if(note.id === req.params.id){
+                console.log(note)
+                const newNote = {
+                    id: note.id,
+                    title: req.body.title,
+                    note: req.body.text
+                }
+                const i = noteArr.indexOf(note)
+                noteArr.splice(i, 1, newNote);
+                console.log(noteArr);
+                fs.writeFile('../db/db.json', JSON.stringify(noteArr), err => {
+                    if(err){
+                        throw err;
+                    }
+                    console.log('written');
+                })
+                return res.send(`${req.body.title} has been edited!`)
+            } else if(!noteArr.some(note => note.id === req.params.id)){ 
+                console.log(`Note # ${req.params.id} does not exist in file. Cannot edit.`);
+                return res.status(404).send(`Note # ${req.params.id} does not exist in file. Cannot edit.`);
+            }
+        })
+    })
+})
 
 
 app.listen(PORT, () => console.log(`Listening on ${PORT}.`));

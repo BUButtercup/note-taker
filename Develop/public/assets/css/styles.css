@@ -76,3 +76,8 @@ body {
   padding: 20px;
   cursor: pointer;
 }
+
+#edit {
+  display: none;
+  margin-top: 1rem;
+}

@@ -4,6 +4,8 @@ let saveNoteBtn;
 let newNoteBtn;
 let noteList;
 
+const editBtn = document.getElementById('edit');
+
 if (window.location.pathname === '/notes') {
   noteTitle = document.querySelector('.note-title');
   noteText = document.querySelector('.note-textarea');
@@ -50,14 +52,36 @@ const deleteNote = (id) =>
     },
   });
 
+const editNote = (id, note) => 
+  fetch(`api/notes/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(note),
+  })
+
+
 const renderActiveNote = () => {
   hide(saveNoteBtn);
 
   if (activeNote.id) {
-    noteTitle.setAttribute('readonly', true);
-    noteText.setAttribute('readonly', true);
     noteTitle.value = activeNote.title;
-    noteText.value = activeNote.text;
+    noteText.value = activeNote.note;
+    show(editBtn)
+    editBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const newNote = {
+        title: noteTitle.value,
+        text: noteText.value,
+      };
+      editNote(activeNote.id, newNote).then(data=>{
+        getAndRenderNotes();
+        noteTitle.value = '';
+        noteText.value = '';
+        hide(editBtn);
+      })
+    })
   } else {
     noteTitle.removeAttribute('readonly');
     noteText.removeAttribute('readonly');
@@ -146,7 +170,15 @@ const renderNoteList = async (notes) => {
         'text-danger',
         'delete-note'
       );
-      delBtnEl.addEventListener('click', handleNoteDelete);
+      delBtnEl.addEventListener('click', (e)=>{
+        // .then(data=>{
+          handleNoteDelete(e)
+          hide(editBtn)
+          document.querySelector('.note-title').innerHTML = '';
+          document.querySelector('.note-textarea').innerHTML = '';
+
+        // })
+      });
 
       liEl.append(delBtnEl);
     }
@@ -166,7 +198,11 @@ const renderNoteList = async (notes) => {
   });
 
   if (window.location.pathname === '/notes') {
-    noteListItems.forEach((note) => noteList[0].append(note));
+    for(let i=1; i<noteListItems.length; i++){
+      noteList[0].append(noteListItems[i]);
+    }
+    
+    // noteList[0].setAttribute('style', 'display:none');
   }
 };
 
@@ -175,9 +211,13 @@ const getAndRenderNotes = () => getNotes().then(renderNoteList);
 
 if (window.location.pathname === '/notes') {
   saveNoteBtn.addEventListener('click', handleNoteSave);
-  newNoteBtn.addEventListener('click', handleNewNoteView);
+  newNoteBtn.addEventListener('click', ()=>{
+    hide(editBtn)
+    handleNewNoteView()
+  });
   noteTitle.addEventListener('keyup', handleRenderSaveBtn);
   noteText.addEventListener('keyup', handleRenderSaveBtn);
+  
 }
 
 getAndRenderNotes();
